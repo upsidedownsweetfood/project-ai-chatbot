@@ -1,5 +1,6 @@
 use reqwest::Client;
 
+#[derive(Clone)]
 pub struct OllamaClient {
     url: String,
     client: Client
