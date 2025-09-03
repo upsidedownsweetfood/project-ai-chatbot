@@ -1,29 +1,28 @@
 mod components;
 mod utils;
 
-use dioxus::prelude::*;
-use components::output_box::OutputBox;
-use utils::ollama_stuff;
+use core::panic;
+use std::env;
 
-use crate::utils::ollama_stuff::OllamaClient;
+use dioxus::prelude::*;
+
+use crate::{
+    components::hero::Hero,
+    components::hero::AppState,
+    components::error,
+    utils::ollama_stuff::OllamaClient
+};
 
 const FAVICON: Asset = asset!("/assets/favicon.ico");
 const MAIN_CSS: Asset = asset!("/assets/main.css");
 
-#[derive(Clone)]
-struct AppState {
-    ollama_client: OllamaClient
-}
-
-fn main() {
-    dioxus::launch(App);
-}
 
 #[component]
-fn App() -> Element {
+fn AppInit(value: String) -> Element {
     let app_state = use_context_provider(|| AppState {
-        ollama_client: OllamaClient::new(reqwest::Client::new(), "localhost:1234".into())
+        ollama_client: OllamaClient::new(reqwest::Client::new(), value),
     });
+
     rsx! {
         document::Link { rel: "icon", href: FAVICON }
         document::Link { rel: "stylesheet", href: MAIN_CSS }
@@ -32,25 +31,13 @@ fn App() -> Element {
 }
 
 #[component]
-pub fn Hero() -> Element {
-    let mut name = use_signal(|| String::new());
-    let mut received_output = use_signal(|| String::new());
-
-    rsx! {
-        div {
-            input {
-                class: "input",
-                placeholder: "Enter your name",
-                oninput: move | event | name.set(event.value())
-            }
-            button {
-                onclick: { move | event | {
-                    use_context::<AppState>().ollama_client;
-                    received_output.set(name.to_string());
-                }},
-                "Enter"
-            }
-            OutputBox { output: received_output}
-        }
+fn App() -> Element {
+    match env::var("OLLAMA_API") {
+        Ok(value) => {AppInit(AppInitProps { value })}
+        Err(e) => {error::Error(error::ErrorProps { err: e.to_string()})}
     }
+}
+
+fn main() {
+    dioxus::launch(App);
 }
