@@ -7,15 +7,15 @@ use std::env;
 use dioxus::prelude::*;
 
 use crate::{
-    components::hero::Hero,
-    components::hero::AppState,
-    components::error,
-    utils::ollama_stuff::OllamaClient
+    components::{
+        error,
+        hero::{AppState, Hero},
+    },
+    utils::ollama_stuff::OllamaClient,
 };
 
 const FAVICON: Asset = asset!("/assets/favicon.ico");
 const MAIN_CSS: Asset = asset!("/assets/main.css");
-
 
 #[component]
 fn AppInit(value: String) -> Element {
@@ -33,8 +33,8 @@ fn AppInit(value: String) -> Element {
 #[component]
 fn App() -> Element {
     match env::var("OLLAMA_API") {
-        Ok(value) => {AppInit(AppInitProps { value })}
-        Err(e) => {error::Error(error::ErrorProps { err: e.to_string()})}
+        Ok(value) => AppInit(AppInitProps { value }),
+        Err(e) => error::Error(error::ErrorProps { err: e.to_string() }),
     }
 }
 
