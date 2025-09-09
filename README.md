@@ -23,3 +23,8 @@ To run for a different platform, use the `--platform platform` flag. E.g.
 dx serve --platform desktop
 ```
 
+### Ideas && References
+Evaluate [Candle](https://github.com/huggingface/candle) in Rust
+* [Docs](https://huggingface.github.io/candle/inference/hub.html)
+* [Example of Pytorch Model in Candle](https://github.com/ToluClassics/candle-tutorial)
+Implement Candle API server in [Actix](https://actix.rs/)
