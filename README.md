@@ -28,3 +28,4 @@ Evaluate [Candle](https://github.com/huggingface/candle) in Rust
 * [Docs](https://huggingface.github.io/candle/inference/hub.html)
 * [Example of Pytorch Model in Candle](https://github.com/ToluClassics/candle-tutorial)
 Implement Candle API server in [Actix](https://actix.rs/)
+* [Example Directory](https://github.com/huggingface/candle/tree/main/candle-examples/examples)
