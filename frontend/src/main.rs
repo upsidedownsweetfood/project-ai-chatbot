@@ -11,7 +11,7 @@ use crate::{
         error,
         hero::{AppState, Hero},
     },
-    utils::ollama_stuff::OllamaClient,
+    utils::ollama_stuff::{ChatRoleMessage, OllamaClient},
 };
 
 const FAVICON: Asset = asset!("/assets/favicon.ico");
@@ -21,6 +21,8 @@ const MAIN_CSS: Asset = asset!("/assets/main.css");
 fn AppInit(value: String) -> Element {
     let app_state = use_context_provider(|| AppState {
         ollama_client: OllamaClient::new(reqwest::Client::new(), value),
+        model: env::var("OLLAMA_MODEL").unwrap(),
+        messages: use_signal(|| Vec::<ChatRoleMessage>::new())
     });
 
     rsx! {
