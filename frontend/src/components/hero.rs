@@ -20,7 +20,11 @@ pub fn Hero() -> Element {
             }
             button {
                 onclick: { move | event | {
-                    use_context::<AppState>().ollama_client;
+                    spawn(async move {
+                        let res = use_context::<AppState>().ollama_client.ping().await;
+                        println!("{:?}", res);
+                    });
+
                     received_output.set(name.to_string());
                 }},
                 "Enter"
