@@ -1,9 +1,14 @@
-use crate::{components::output_box::OutputBox, utils::ollama_stuff::OllamaClient};
+use crate::{
+    components::output_box::OutputBox,
+    utils::ollama_stuff::{ChatResponseBody, ChatRoleMessage, OllamaClient},
+};
 use dioxus::prelude::*;
 
 #[derive(Clone)]
 pub struct AppState {
     pub ollama_client: OllamaClient,
+    pub model: String,
+    pub messages: Vec<ChatRoleMessage>,
 }
 
 #[component]
@@ -19,9 +24,15 @@ pub fn Hero() -> Element {
                 oninput: move | event | name.set(event.value())
             }
             button {
-                onclick: { move | event | {
-                    use_context::<AppState>().ollama_client;
-                    received_output.set(name.to_string());
+                onclick: { move |_| {
+                    spawn(async move {
+                        let model = use_context::<AppState>().model;
+                        let mut current_messages = use_context::<AppState>().messages.clone();
+                        let res = use_context::<AppState>().ollama_client.chat(name.to_string(), model.as_str(), &mut current_messages).await;
+
+                        //received_output.set(format!("{:?}", current_messages));
+                        received_output.set(format!("{:?}", res.unwrap().json::<ChatResponseBody>().await.unwrap().message.content));
+                    });
                 }},
                 "Enter"
             }

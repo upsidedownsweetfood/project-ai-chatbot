@@ -1,4 +1,25 @@
-use reqwest::Client;
+use reqwest::{Client, Response};
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct  ChatRoleMessage {
+    pub role: String,
+    pub content: String
+}
+
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ChatRequestBody {
+    model: String,
+    messages: Vec<ChatRoleMessage>,
+    stream: bool
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct  ChatResponseBody {
+    pub model: String,
+    pub message: ChatRoleMessage
+}
 
 #[derive(Clone)]
 pub struct OllamaClient {
@@ -12,5 +33,22 @@ impl OllamaClient {
             url,
             client
         }
+    }
+
+    pub async fn chat(self, text: String, model: &str, messages: &mut Vec<ChatRoleMessage>) -> Result<Response, reqwest::Error> {
+        messages.push(ChatRoleMessage {
+            role: "user".into(),
+            content: text
+        });
+    
+        self.client
+        .post(format!("{}/api/chat", self.url))
+        .json(&ChatRequestBody {
+            model: model.into(),
+            messages: messages.clone(),
+            stream: false
+        })
+        .send()
+        .await
     }
 }
