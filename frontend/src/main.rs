@@ -22,7 +22,7 @@ fn AppInit(value: String) -> Element {
     let app_state = use_context_provider(|| AppState {
         ollama_client: OllamaClient::new(reqwest::Client::new(), value),
         model: env::var("OLLAMA_MODEL").unwrap(),
-        messages: use_signal(|| Vec::<ChatRoleMessage>::new())
+        messages: Vec::<ChatRoleMessage>::new(),
     });
 
     rsx! {
