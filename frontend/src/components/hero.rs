@@ -14,29 +14,36 @@ pub struct AppState {
 #[component]
 pub fn Hero() -> Element {
     let mut name = use_signal(|| String::new());
-    let mut received_output = use_signal(|| String::new());
+    let received_output = use_signal(|| String::new());
+    let app_state = use_context::<AppState>();
 
     rsx! {
         div {
             input {
                 class: "input",
                 placeholder: "Enter your name",
-                oninput: move | event | name.set(event.value())
+                oninput: move |event| name.set(event.value())
             }
             button {
-                onclick: { move |_| {
-                    spawn(async move {
-                        let model = use_context::<AppState>().model;
-                        let mut current_messages = use_context::<AppState>().messages.clone();
-                        let res = use_context::<AppState>().ollama_client.chat(name.to_string(), model.as_str(), &mut current_messages).await;
+                onclick: move |_| {
+                    let name = name.to_string();
+                    let model = app_state.model.clone();
+                    let ollama_client = app_state.ollama_client.clone();
+                    let mut messages = app_state.messages.clone();
+                    let mut received_output = received_output.clone();
 
-                        //received_output.set(format!("{:?}", current_messages));
-                        received_output.set(format!("{:?}", res.unwrap().json::<ChatResponseBody>().await.unwrap().message.content));
+                    spawn(async move {
+                        let res = ollama_client.chat(name, &model, &mut messages).await;
+                        if let Ok(response) = res {
+                            if let Ok(body) = response.json::<ChatResponseBody>().await {
+                                received_output.set(body.message.content);
+                            }
+                        }
                     });
-                }},
+                },
                 "Enter"
             }
-            OutputBox { output: received_output}
+            OutputBox { output: received_output }
         }
     }
 }
