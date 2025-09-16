@@ -8,37 +8,39 @@ use dioxus::prelude::*;
 pub struct AppState {
     pub ollama_client: OllamaClient,
     pub model: String,
-    pub messages: Vec<ChatRoleMessage>,
 }
 
 #[component]
 pub fn Hero() -> Element {
-    let mut name = use_signal(|| String::new());
-    let received_output = use_signal(|| String::new());
+    let mut chat_input = use_signal(|| String::new());
+    let mut received_output = use_signal(|| String::new());
+    let mut messages = use_signal(|| Vec::<ChatRoleMessage>::new());
+
+    messages.push(ChatRoleMessage {
+        role: "system".into(),
+        content: "Tu sei un assistente di bancasella aiuta il cliente mostrando grandissima deferenza".into(),
+    });
+
     let app_state = use_context::<AppState>();
 
     rsx! {
         div {
             input {
                 class: "input",
-                placeholder: "Enter your name",
-                oninput: move |event| name.set(event.value())
+                placeholder: "...",
+                oninput: move |event| chat_input.set(event.value())
             }
             button {
                 onclick: move |_| {
-                    let name = name.to_string();
                     let model = app_state.model.clone();
                     let ollama_client = app_state.ollama_client.clone();
-                    let mut messages = app_state.messages.clone();
-                    let mut received_output = received_output.clone();
 
                     spawn(async move {
-                        let res = ollama_client.chat(name, &model, &mut messages).await;
-                        if let Ok(response) = res {
-                            if let Ok(body) = response.json::<ChatResponseBody>().await {
-                                received_output.set(body.message.content);
-                            }
-                        }
+                        let mut msgs = messages.read().clone();
+                        let res = ollama_client.chat(chat_input.to_string(), &model, &mut msgs).await.unwrap();
+                        received_output.set(format!("{:?}", res.json::<ChatResponseBody>().await.unwrap().message.content));
+
+                        messages.set(msgs);
                     });
                 },
                 "Enter"

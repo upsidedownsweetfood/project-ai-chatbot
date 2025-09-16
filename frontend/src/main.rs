@@ -19,22 +19,22 @@ const MAIN_CSS: Asset = asset!("/assets/main.css");
 
 #[component]
 fn AppInit(value: String) -> Element {
-    let model = env::var("OLLAMA_MODEL").unwrap();
-    let ollama_client = OllamaClient::new(reqwest::Client::new(), value);
+    let mut ollama_client = OllamaClient::new(reqwest::Client::new(), value);
+    let mut model = env::var("OLLAMA_MODEL").unwrap();
 
-    let app_state = use_context_provider(|| AppState {
-        ollama_client,
-        model: model.clone(),
-        messages: Vec::<ChatRoleMessage>::new(),
+    use_context_provider(|| AppState {
+        ollama_client: ollama_client,
+        model,
     });
 
     spawn(async move {
-        use_context::<AppState>()
-            .ollama_client
-            .pull_model(model.as_str())
+        let app_state = use_context::<AppState>();
+
+        app_state.ollama_client
+            .pull_model(&app_state.model)
             .await
             .unwrap_or_else(|err| {
-                panic!("Failed to pull model {}: {}", model, err);
+                panic!("Failed to pull model {}: {}", app_state.model, err);
             });
     });
 
