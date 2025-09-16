@@ -4,7 +4,6 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-        
         {
             "type": "lldb",
             "request": "launch",
@@ -21,7 +20,7 @@
                 }
             },
             "env": {
-                "OLLAMA_API": "http://127.0.0.1:11434",
+                "OLLAMA_API": "http://localhost:11434",
                 "OLLAMA_MODEL": "mistral:7b"
             },
             "args": [],
