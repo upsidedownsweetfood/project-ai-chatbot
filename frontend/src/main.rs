@@ -9,18 +9,24 @@ use dioxus::prelude::*;
 use crate::{
     components::{
         error,
-        hero::{AppState, Hero},
+        chatview::ChatView,
     },
-    utils::ollama_stuff::{ChatRoleMessage, OllamaClient},
+    utils::ollama_stuff::OllamaClient,
 };
 
 const FAVICON: Asset = asset!("/assets/favicon.ico");
 const MAIN_CSS: Asset = asset!("/assets/main.css");
 
+#[derive(Clone)]
+pub struct AppState {
+    pub ollama_client: OllamaClient,
+    pub model: String,
+}
+
 #[component]
 fn AppInit(value: String) -> Element {
-    let mut ollama_client = OllamaClient::new(reqwest::Client::new(), value);
-    let mut model = env::var("OLLAMA_MODEL").unwrap();
+    let ollama_client = OllamaClient::new(reqwest::Client::new(), value);
+    let model = env::var("OLLAMA_MODEL").unwrap();
 
     use_context_provider(|| AppState {
         ollama_client: ollama_client,
@@ -41,7 +47,7 @@ fn AppInit(value: String) -> Element {
     rsx! {
         document::Link { rel: "icon", href: FAVICON }
         document::Link { rel: "stylesheet", href: MAIN_CSS }
-        Hero {}
+        ChatView {}
     }
 }
 

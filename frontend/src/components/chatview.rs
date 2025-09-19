@@ -1,17 +1,11 @@
 use crate::{
     components::output_box::OutputBox,
-    utils::ollama_stuff::{ChatResponseBody, ChatRoleMessage, OllamaClient},
+    utils::ollama_stuff::{ChatResponseBody, ChatRoleMessage}, AppState,
 };
 use dioxus::prelude::*;
 
-#[derive(Clone)]
-pub struct AppState {
-    pub ollama_client: OllamaClient,
-    pub model: String,
-}
-
 #[component]
-pub fn Hero() -> Element {
+pub fn ChatView() -> Element {
     let mut chat_input = use_signal(|| String::new());
     let mut received_output = use_signal(|| String::new());
     let mut messages = use_signal(|| Vec::<ChatRoleMessage>::new());
