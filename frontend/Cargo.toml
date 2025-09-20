@@ -11,6 +11,7 @@ cpal = "0.16.0"
 dioxus = { version = "0.6.0", features = [] }
 reqwest = { version = "0.12.23", features = ["json"]}
 serde = { version="1.0.219", features = ["std", "serde_derive"] }
+tokio = "1.47.1"
 
 [features]
 default = ["desktop"]

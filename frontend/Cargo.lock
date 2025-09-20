@@ -3563,6 +3563,7 @@ dependencies = [
  "dioxus",
  "reqwest",
  "serde",
+ "tokio",
 ]
 
 [[package]]

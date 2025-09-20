@@ -7,11 +7,11 @@ use std::env;
 use dioxus::prelude::*;
 
 use crate::{
-    components::{
-        error,
-        chatview::ChatView,
+    components::{chatview::ChatView, error},
+    utils::{
+        audio_stream::{generate_sine_wave, stream_audio_data},
+        ollama_stuff::OllamaClient,
     },
-    utils::ollama_stuff::OllamaClient,
 };
 
 const FAVICON: Asset = asset!("/assets/favicon.ico");
@@ -36,7 +36,8 @@ fn AppInit(value: String) -> Element {
     spawn(async move {
         let app_state = use_context::<AppState>();
 
-        app_state.ollama_client
+        app_state
+            .ollama_client
             .pull_model(&app_state.model)
             .await
             .unwrap_or_else(|err| {
@@ -59,6 +60,21 @@ fn App() -> Element {
     }
 }
 
-fn main() {
-    dioxus::launch(App);
+// fn main() {
+//     dioxus::launch(App);
+// }
+
+#[tokio::main]
+async fn main() {
+    let sample_rate = 44100;
+    let freq = 440.0; // La
+    let duration_secs = 2.0;
+    let audio_data = generate_sine_wave(sample_rate, freq, duration_secs);
+
+    println!(
+        "Riproduco sinusoide {} Hz per {} secondi...",
+        freq, duration_secs
+    );
+    stream_audio_data(&audio_data, sample_rate).await;
+    println!("Fine riproduzione.");
 }
