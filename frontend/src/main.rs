@@ -9,7 +9,7 @@ use dioxus::prelude::*;
 use crate::{
     components::{chatview::ChatView, error},
     utils::{
-        audio_stream::{generate_sine_wave, stream_audio_data},
+        audio_stream::{play_mp3_file, stream_audio_data},
         ollama_stuff::OllamaClient,
     },
 };
@@ -66,15 +66,9 @@ fn App() -> Element {
 
 #[tokio::main]
 async fn main() {
-    let sample_rate = 44100;
-    let freq = 440.0; // La
-    let duration_secs = 2.0;
-    let audio_data = generate_sine_wave(sample_rate, freq, duration_secs);
-
-    println!(
-        "Riproduco sinusoide {} Hz per {} secondi...",
-        freq, duration_secs
-    );
-    stream_audio_data(&audio_data, sample_rate).await;
+    println!("Riproduco audio");
+    tokio::task::spawn_blocking(|| play_mp3_file())
+        .await
+        .unwrap();
     println!("Fine riproduzione.");
 }

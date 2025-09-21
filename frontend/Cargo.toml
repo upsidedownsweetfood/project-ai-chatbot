@@ -7,11 +7,13 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-cpal = "0.16.0"
+cpal = { version = "0.16"}
+minimp3 = "0.5"
 dioxus = { version = "0.6.0", features = [] }
 reqwest = { version = "0.12.23", features = ["json"]}
 serde = { version="1.0.219", features = ["std", "serde_derive"] }
 tokio = "1.47.1"
+rodio = "0.21.1"
 
 [features]
 default = ["desktop"]
