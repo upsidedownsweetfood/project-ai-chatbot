@@ -9,7 +9,7 @@ use dioxus::prelude::*;
 use crate::{
     components::{chatview::ChatView, error},
     utils::{
-        audio_stream::{play_mp3_file, stream_audio_data},
+        audio_stream::{self, stream_audio_data},
         ollama_stuff::OllamaClient,
     },
 };
@@ -64,11 +64,8 @@ fn App() -> Element {
 //     dioxus::launch(App);
 // }
 
-#[tokio::main]
-async fn main() {
+fn main() {
     println!("Riproduco audio");
-    tokio::task::spawn_blocking(|| play_mp3_file())
-        .await
-        .unwrap();
+    stream_audio_data("../SoundHelix-Song-1.mp3".to_string());
     println!("Fine riproduzione.");
 }
