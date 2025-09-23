@@ -14,6 +14,7 @@ reqwest = { version = "0.12.23", features = ["json"]}
 serde = { version="1.0.219", features = ["std", "serde_derive"] }
 tokio = "1.47.1"
 rodio = "0.21.1"
+natural-tts = "0.2.1"
 
 [features]
 default = ["desktop"]

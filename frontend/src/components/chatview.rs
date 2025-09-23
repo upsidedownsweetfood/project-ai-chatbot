@@ -1,6 +1,8 @@
 use crate::{
     components::output_box::OutputBox,
-    utils::ollama_stuff::{ChatResponseBody, ChatRoleMessage}, AppState,
+    utils::ollama_stuff::{ChatResponseBody, ChatRoleMessage},
+    utils::tts::say_message,
+    AppState,
 };
 use dioxus::prelude::*;
 
@@ -12,7 +14,9 @@ pub fn ChatView() -> Element {
 
     messages.push(ChatRoleMessage {
         role: "system".into(),
-        content: "Tu sei un assistente di bancasella aiuta il cliente mostrando grandissima deferenza".into(),
+        content:
+            "Tu sei un assistente di bancasella aiuta il cliente mostrando grandissima deferenza"
+                .into(),
     });
 
     let app_state = use_context::<AppState>();
@@ -32,7 +36,10 @@ pub fn ChatView() -> Element {
                     spawn(async move {
                         let mut msgs = messages.read().clone();
                         let res = ollama_client.chat(chat_input.to_string(), &model, &mut msgs).await.unwrap();
-                        received_output.set(format!("{:?}", res.json::<ChatResponseBody>().await.unwrap().message.content));
+                        let response = res.json::<ChatResponseBody>().await.unwrap().message.content;
+                        received_output.set(format!("{:?}", response.clone()));
+                        say_message(response.to_string()).expect("Failed to say hello");
+
 
                         messages.set(msgs);
                     });

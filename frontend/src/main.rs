@@ -8,10 +8,7 @@ use dioxus::prelude::*;
 
 use crate::{
     components::{chatview::ChatView, error},
-    utils::{
-        audio_stream::{self, stream_audio_data},
-        ollama_stuff::OllamaClient,
-    },
+    utils::ollama_stuff::OllamaClient,
 };
 
 const FAVICON: Asset = asset!("/assets/favicon.ico");
@@ -26,11 +23,11 @@ pub struct AppState {
 #[component]
 fn AppInit(value: String) -> Element {
     let ollama_client = OllamaClient::new(reqwest::Client::new(), value);
-    let model = env::var("OLLAMA_MODEL").unwrap();
+    let ollama_model = env::var("OLLAMA_MODEL").unwrap();
 
     use_context_provider(|| AppState {
         ollama_client: ollama_client,
-        model,
+        model: ollama_model,
     });
 
     spawn(async move {
@@ -60,12 +57,6 @@ fn App() -> Element {
     }
 }
 
-// fn main() {
-//     dioxus::launch(App);
-// }
-
 fn main() {
-    println!("Riproduco audio");
-    stream_audio_data("../SoundHelix-Song-1.mp3".to_string());
-    println!("Fine riproduzione.");
+    dioxus::launch(App);
 }
