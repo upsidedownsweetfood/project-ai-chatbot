@@ -1,15 +1,18 @@
 use gemini_rust::{ Content, Gemini, Message, Part, Role, GenerationResponse };
 use std::{ env, error::Error };
 
+#[derive(Clone)]
 pub struct GeminiRequest {
+    pub client: Gemini,
     pub prompt: String,
     pub message: String,
     pub context: Vec<Message>,
 }
 
 impl GeminiRequest {
-    pub fn new(prompt: &str) -> Self {
+    pub fn new(client: Gemini, prompt: &str) -> Self {
         Self {
+            client: client,
             prompt: prompt.to_string(),
             message: String::new(),
             context: vec![],
@@ -28,10 +31,9 @@ pub async fn create_client() -> Result<Gemini, Box<dyn Error>> {
 }
 
 pub async fn send_message_to_gemini(
-    client: &Gemini,
     req: &mut GeminiRequest
 ) -> Result<String, Box<dyn Error>> {
-    let response = client
+    let response = req.client
         .generate_content()
         .with_system_prompt(&req.prompt)
         .with_messages(req.context.clone())
