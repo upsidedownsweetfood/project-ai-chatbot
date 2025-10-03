@@ -1,5 +1,9 @@
-use gemini_rust::{ Content, Gemini, Message, Part, Role, GenerationResponse };
-use std::{ env, error::Error };
+use gemini_rust::{Content, Gemini, GenerationResponse, Message, Part, Role};
+use std::{
+    env,
+    error::Error,
+    sync::{Arc, Mutex},
+};
 
 #[derive(Clone)]
 pub struct GeminiRequest {
@@ -18,11 +22,14 @@ impl GeminiRequest {
             context: vec![],
         }
     }
-    
+
     pub fn set_message(&mut self, message: &str) {
         self.message = message.to_string();
     }
 }
+
+#[derive(Clone)]
+pub struct GeminiRequestArcMutex(pub Arc<Mutex<GeminiRequest>>);
 
 pub async fn create_client() -> Result<Gemini, Box<dyn Error>> {
     let api_key = env::var("GEMINI_API_KEY").expect(r#"GEMINI_API_KEY must be set in config file"#);
@@ -30,15 +37,15 @@ pub async fn create_client() -> Result<Gemini, Box<dyn Error>> {
     Ok(client)
 }
 
-pub async fn send_message_to_gemini(
-    req: &mut GeminiRequest
-) -> Result<String, Box<dyn Error>> {
-    let response = req.client
+pub async fn send_message_to_gemini(req: &mut GeminiRequest) -> Result<String, Box<dyn Error>> {
+    let response = req
+        .client
         .generate_content()
         .with_system_prompt(&req.prompt)
         .with_messages(req.context.clone())
         .with_user_message(&req.message)
-        .execute().await?;
+        .execute()
+        .await?;
 
     update_context_with_gemini_response(&response, req).await?;
 
@@ -47,19 +54,17 @@ pub async fn send_message_to_gemini(
 
 async fn update_context_with_gemini_response(
     response: &GenerationResponse,
-    req: &mut GeminiRequest
+    req: &mut GeminiRequest,
 ) -> Result<(), Box<dyn Error>> {
     req.context.push(Message {
         role: Role::User,
         content: Content {
             role: Some(Role::User),
-            parts: Some(
-                vec![Part::Text {
-                    text: req.message.clone(),
-                    thought: None,
-                    thought_signature: None,
-                }]
-            ),
+            parts: Some(vec![Part::Text {
+                text: req.message.clone(),
+                thought: None,
+                thought_signature: None,
+            }]),
         },
     });
 
@@ -67,13 +72,11 @@ async fn update_context_with_gemini_response(
         role: Role::Model,
         content: Content {
             role: Some(Role::Model),
-            parts: Some(
-                vec![Part::Text {
-                    text: response.text().to_string(),
-                    thought: None,
-                    thought_signature: None,
-                }]
-            ),
+            parts: Some(vec![Part::Text {
+                text: response.text().to_string(),
+                thought: None,
+                thought_signature: None,
+            }]),
         },
     });
 
