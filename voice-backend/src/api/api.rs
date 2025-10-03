@@ -1,29 +1,30 @@
-pub use actix_web::{HttpRequest, HttpResponse, web};
+pub use actix_web::{HttpResponse, post, web};
+use serde::Deserialize;
 
 use crate::gemini::{GeminiRequestArcMutex, send_message_to_gemini};
 
-#[allow(clippy::async_yields_async)]
+#[derive(Debug, Deserialize)]
+pub struct FrontendMessage {
+    pub message: String,
+}
+
+#[post("/message")]
 pub async fn input_message(
-    req: HttpRequest,
+    req: web::Json<FrontendMessage>,
     gemini_request: web::Data<GeminiRequestArcMutex>,
 ) -> HttpResponse {
-    println!("Received request: {:?}", req);
+    let message = req.message.as_str();
 
-    let message = req
-        .match_info()
-        .get("message")
-        .unwrap_or("Hello, I am Francesco");
-
-    println!("Message: {}", message);
+    println!("MESSAGE FROM USER:\n {}\n", message);
 
     let mut gemini_request = gemini_request.0.lock().unwrap();
     gemini_request.set_message(message);
 
     let response = send_message_to_gemini(&mut gemini_request)
         .await
-        .unwrap_or_else(|e| format!("Error sending message to Gemini: {}", e.to_string()));
+        .unwrap_or_else(|e| format!("Error sending message to Gemini: {}\n", e.to_string()));
 
-    println!("\nResponse from Gemini: {}", response);
+    println!("RESPONSE FROM GEMINI:\n{}\n", response);
 
     HttpResponse::Ok().body(response)
 }
