@@ -1,6 +1,6 @@
 mod api;
 mod gemini;
-use actix_web::{App, HttpServer, web};
+use actix_web::{App, HttpServer, web, middleware::Logger};
 use api::input_message;
 use gemini::{GeminiRequest, GeminiRequestArcMutex, create_client};
 use std::{error::Error, sync::Arc};
@@ -17,6 +17,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     HttpServer::new(move || {
         App::new()
+            .wrap(Logger::default())
             .app_data(web::Data::new(gemini_request.clone()))
             .service(input_message)
     })
