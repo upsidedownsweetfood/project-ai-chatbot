@@ -1,0 +1,12 @@
+import { MaterialWindow, Vertical } from "@material";
+import { TextButton } from "@material";
+
+export component AppWindow inherits MaterialWindow {
+    in-out property <int> counter: 42;
+    callback request-increase-value();
+    Vertical {
+        TextButton {
+            text: "Counter: \{root.counter}";
+        }
+    }
+}
