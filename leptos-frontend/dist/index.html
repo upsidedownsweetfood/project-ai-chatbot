@@ -1,10 +1,19 @@
 <!DOCTYPE html>
 <html>
-    <head><link rel="modulepreload" href="/leptos-frontend-7bc1a1f97406572a.js" crossorigin="anonymous" integrity="sha384-Zf5eu/0rpJLiq2GAXHMCplgf8U5Ch2x35AZHGryHdqX5JIGsfX7I4GRFxHGYQaEP"><link rel="preload" href="/leptos-frontend-7bc1a1f97406572a_bg.wasm" crossorigin="anonymous" integrity="sha384-0fiKLyfOGmO5UHy06iFYOIXGiM56y6NtpSpcu8S3r02ltbzP64VYe+1Jf98h/qlj" as="fetch" type="application/wasm"></head>
-    <body>
+
+<head>
+  <!-- Add a plain CSS file: see https://trunkrs.dev/assets/#css -->
+  <!-- If using Tailwind with Leptos CSR, see https://trunkrs.dev/assets/#tailwind instead-->
+  <link rel="stylesheet" href="/styles-5c3b434add5b7891.css" integrity="sha384-s01EZdpoj/+TtZ9XRTN1vE08/F2A12fR/J4YHCnDhg15AWcgUbqxegvxeW0vINi8"/>
+
+  <!-- Include favicon in dist output: see https://trunkrs.dev/assets/#icon -->
+  <link rel="icon" href="/favicon-e9cbd8f50cc65bf2.ico" integrity="sha384-YobgLXwtz0GhXVUTHml49p32guapVFlEG8UpQdDVN3kekOqkQi+qSXEpwp+yM4BW"/>
+
+  <!-- include support for `wasm-bindgen --weak-refs` - see: https://rustwasm.github.io/docs/wasm-bindgen/reference/weak-references.html -->
+  
 <script type="module">
-import init, * as bindings from '/leptos-frontend-7bc1a1f97406572a.js';
-const wasm = await init({ module_or_path: '/leptos-frontend-7bc1a1f97406572a_bg.wasm' });
+import init, * as bindings from '/leptos-frontend-b85b2a6b797f7763.js';
+const wasm = await init({ module_or_path: '/leptos-frontend-b85b2a6b797f7763_bg.wasm' });
 
 
 window.wasmBindings = bindings;
@@ -12,7 +21,10 @@ window.wasmBindings = bindings;
 
 dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
 
-</script><script>"use strict";
+</script>
+<link rel="modulepreload" href="/leptos-frontend-b85b2a6b797f7763.js" crossorigin="anonymous" integrity="sha384-Tui9dYFxYqtDgvvzSsMJYtHzKJZKYYnH0LYbkExi42crdzA2UePSAgy0yRZ1cjde"><link rel="preload" href="/leptos-frontend-b85b2a6b797f7763_bg.wasm" crossorigin="anonymous" integrity="sha384-ep2YPUnwLKa93OxeZIzOU8uDm4DdRAAv/VM1YHiMT8t+yLMymHgNygg0ZtYnVoHb" as="fetch" type="application/wasm"></head>
+
+<body><script>"use strict";
 
 (function () {
 
@@ -142,4 +154,5 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
 
 })()
 </script></body>
+
 </html>
