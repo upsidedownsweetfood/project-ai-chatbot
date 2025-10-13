@@ -29,6 +29,32 @@ fn app() -> Element {
     });
     let mut input_value = use_signal(|| "".to_string());
     let mut synth_state = use_signal(|| SynthState::Idle);
+    let mut next_id = use_signal(|| 1);
+
+    let mut handle_send = move || {
+        let text = input_value();
+        if text.trim().is_empty() {
+            return;
+        }
+        messages.write().push(ChatMessage {
+            id: next_id(),
+            content: text.clone(),
+            is_user: true,
+        });
+        next_id += 1;
+        input_value.set("".to_string());
+        synth_state.set(SynthState::Speaking);
+        spawn(async move {
+            gloo_timers::future::TimeoutFuture::new(10_000).await;
+            messages.write().push(ChatMessage {
+                id: next_id(),
+                content: format!("Ho ricevuto: \"{}\". Sto analizzando la richiesta...", text,),
+                is_user: false,
+            });
+            next_id += 1;
+            synth_state.set(SynthState::Idle);
+        });
+    };
 
     rsx! {
         document::Stylesheet { href: CSS }
@@ -60,35 +86,7 @@ fn app() -> Element {
                         oninput: move |evt| input_value.set(evt.value()),
                         onkeydown: move |evt| {
                             if evt.key() == Key::Enter {
-                                let text = input_value();
-                                if text.trim().is_empty() {
-                                    return;
-                                }
-                                let user_msg_id = messages.len();
-                                messages
-                                    .write()
-                                    .push(ChatMessage {
-                                        id: user_msg_id,
-                                        content: text.clone(),
-                                        is_user: true,
-                                    });
-                                input_value.set("".to_string());
-                                synth_state.set(SynthState::Speaking);
-                                spawn(async move {
-                                    gloo_timers::future::TimeoutFuture::new(2000).await;
-                                    let bot_msg_id = messages().len();
-                                    messages
-                                        .write()
-                                        .push(ChatMessage {
-                                            id: bot_msg_id,
-                                            content: format!(
-                                                "Ho ricevuto: \"{}\". Sto analizzando la richiesta...",
-                                                text,
-                                            ),
-                                            is_user: false,
-                                        });
-                                    synth_state.set(SynthState::Idle);
-                                });
+                                handle_send();
                             }
                         },
                     }
@@ -96,35 +94,7 @@ fn app() -> Element {
                     button {
                         class: "send-btn",
                         onclick: move |_| {
-                            let text = input_value();
-                            if text.trim().is_empty() {
-                                return;
-                            }
-                            let user_msg_id = messages.len();
-                            messages
-                                .write()
-                                .push(ChatMessage {
-                                    id: user_msg_id,
-                                    content: text.clone(),
-                                    is_user: true,
-                                });
-                            input_value.set("".to_string());
-                            synth_state.set(SynthState::Speaking);
-                            spawn(async move {
-                                gloo_timers::future::TimeoutFuture::new(2000).await;
-                                let bot_msg_id = messages().len();
-                                messages
-                                    .write()
-                                    .push(ChatMessage {
-                                        id: bot_msg_id,
-                                        content: format!(
-                                            "Ho ricevuto: \"{}\". Sto analizzando la richiesta...",
-                                            text,
-                                        ),
-                                        is_user: false,
-                                    });
-                                synth_state.set(SynthState::Idle);
-                            });
+                            handle_send();
                         },
                         svg {
                             xmlns: "http://www.w3.org/2000/svg",
