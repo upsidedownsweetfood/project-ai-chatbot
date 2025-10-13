@@ -1,0 +1,208 @@
+/* --- Variabili Globali e Reset --- */
+:root {
+    /* Colore Condiviso (un Ciano "Tech") */
+    --primary-color: #00e5ff;
+    --primary-glow: rgba(0, 229, 255, 0.5);
+    
+    /* Colori di Sfondo */
+    --bg-dark: #0a0a0a;
+    --panel-bg: #121212;
+    --input-bg: #1e1e1e;
+    
+    /* Colori Testo e Bordi */
+    --text-main: #e0e0e0;
+    --text-dim: #a0a0a0;
+    --border-color: #333;
+    
+    /* Colori Bolle Chat */
+    --bot-bubble-bg: #2a2a2a;
+    --user-bubble-text: #0a0a0a; /* Testo scuro su sfondo primary */
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* --- Layout Principale (Flexbox Classico) --- */
+.main-container {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+}
+
+/* Stile comune per i due pannelli */
+.split-panel {
+    flex: 1; /* Divisione 50/50 */
+    display: flex;
+    flex-direction: column;
+    background-color: var(--panel-bg);
+    position: relative;
+}
+
+/* Responsive: su mobile uno sopra l'altro */
+@media (max-width: 768px) {
+    .main-container {
+        flex-direction: column;
+    }
+    .chat-panel { flex: 6; } /* Più spazio alla chat su mobile */
+    .synth-panel { flex: 4; border-top: 1px solid var(--border-color); }
+}
+
+/* --- 1. Pannello CHAT --- */
+.chat-panel {
+    border-right: 1px solid var(--border-color);
+}
+
+.chat-history {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    scroll-behavior: smooth;
+}
+
+/* Stile delle bolle */
+.message-wrapper {
+    display: flex;
+    width: 100%;
+    /* Transizione fluida per l'apparizione */
+    animation: fadeIn 0.3s ease-out;
+}
+
+.message-bubble {
+    max-width: 75%;
+    padding: 12px 18px;
+    border-radius: 20px;
+    line-height: 1.4;
+    font-size: 0.95rem;
+    word-wrap: break-word;
+    transition: all 0.3s ease;
+}
+
+/* Specifiche Bot */
+.message-wrapper.bot { justify-content: flex-start; }
+.message-wrapper.bot .message-bubble {
+    background-color: var(--bot-bubble-bg);
+    color: var(--text-main);
+    border-bottom-left-radius: 4px;
+}
+
+/* Specifiche Utente (Usa il Colore Condiviso) */
+.message-wrapper.user { justify-content: flex-end; }
+.message-wrapper.user .message-bubble {
+    background-color: var(--primary-color);
+    color: var(--user-bubble-text);
+    border-bottom-right-radius: 4px;
+    font-weight: 500;
+    box-shadow: 0 2px 10px var(--primary-glow);
+}
+
+/* Area Input */
+.input-area {
+    padding: 15px;
+    background-color: var(--bg-dark);
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    gap: 10px;
+}
+
+.input-area input {
+    flex-grow: 1;
+    background-color: var(--input-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    padding: 12px 20px;
+    border-radius: 25px;
+    outline: none;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.input-area input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 5px var(--primary-glow);
+}
+
+.send-btn {
+    background-color: var(--primary-color);
+    color: var(--user-bubble-text);
+    border: none;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.send-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px var(--primary-glow);
+}
+
+/* --- 2. Pannello SINTETIZZATORE (Orb Stile Siri) --- */
+.synth-panel {
+    justify-content: center;
+    align-items: center;
+    overflow: hidden; /* Importante per contenere l'effetto glow */
+}
+
+/* Contenitore dell'Orb per centrarlo */
+.orb-container {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* L'Orb stesso */
+.orb {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    /* Stato IDLE: un colore tenue, spento */
+    background: #333; 
+    position: absolute;
+    /* Transizioni fluide su TUTTE le proprietà che cambiano */
+    transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 0 0 0 rgba(0,0,0,0);
+}
+
+/* Stato SPEAKING: Attiva il Colore Condiviso e l'Animazione */
+.orb.speaking {
+    /* Diventa del colore primario con un gradiente */
+    background: linear-gradient(135deg, var(--primary-color), #009fb3);
+    width: 100px; /* Diventa leggermente più grande */
+    height: 100px;
+    /* Glow intenso */
+    box-shadow: 0 0 30px 5px var(--primary-glow), inset 0 0 20px rgba(255,255,255,0.3);
+    /* Animazione di morphing organico */
+    animation: liquid-morph 2s infinite ease-in-out;
+}
+
+/* Animazione Morphing (simil-liquido/Siri) */
+@keyframes liquid-morph {
+    0% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; transform: scale(1); }
+    50% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; transform: scale(1.1); }
+    100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; transform: scale(1); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
