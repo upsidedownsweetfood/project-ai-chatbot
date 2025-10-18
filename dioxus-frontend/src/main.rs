@@ -1,5 +1,7 @@
 use dioxus::prelude::*;
-use gloo_timers;
+use wasm_bindgen::prelude::*;
+use wasm_bindgen::JsCast;
+use web_sys::SpeechSynthesisUtterance;
 
 #[derive(Clone, PartialEq)]
 struct ChatMessage {
@@ -12,6 +14,48 @@ struct ChatMessage {
 enum SynthState {
     Idle,
     Speaking,
+}
+
+async fn speak_text(text: String) {
+    let window = match web_sys::window() {
+        Some(win) => win,
+        None => {
+            println!("global window not found");
+            return;
+        }
+    };
+
+    let synth = match window.speech_synthesis() {
+        Ok(s) => s,
+        Err(_) => {
+            println!("no synthetizer found");
+            return;
+        }
+    };
+
+    let utterance = match SpeechSynthesisUtterance::new_with_text(&text) {
+        Ok(u) => u,
+        Err(_) => {
+            println!("Impossible to create utterance");
+            return;
+        }
+    };
+
+    utterance.set_lang("it-IT");
+
+    let (tx, rx) = futures::channel::oneshot::channel::<()>();
+    let mut tx_opt = Some(tx);
+    let on_end_callback = Closure::wrap(Box::new(move || {
+        if let Some(tx) = tx_opt.take() {
+            let _ = tx.send(());
+        }
+    }) as Box<dyn FnMut()>);
+
+    utterance.set_onend(Some(on_end_callback.as_ref().unchecked_ref()));
+    on_end_callback.forget();
+
+    synth.speak(&utterance);
+    let _ = rx.await;
 }
 
 fn main() {
@@ -45,13 +89,17 @@ fn app() -> Element {
         input_value.set("".to_string());
         synth_state.set(SynthState::Speaking);
         spawn(async move {
-            gloo_timers::future::TimeoutFuture::new(10_000).await;
+            let response = format!(
+                "Ho ricevuto: \"{}\". Sto analizzando la richiesta...",
+                text.clone(),
+            );
             messages.write().push(ChatMessage {
                 id: next_id(),
-                content: format!("Ho ricevuto: \"{}\". Sto analizzando la richiesta...", text,),
+                content: response.clone(),
                 is_user: false,
             });
             next_id += 1;
+            speak_text(response).await;
             synth_state.set(SynthState::Idle);
         });
     };
